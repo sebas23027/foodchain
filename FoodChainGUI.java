@@ -1000,18 +1000,6 @@ public class FoodChainGUI extends JFrame {
         return panel;
     }
     
-    private static String getEmojiForCategory(String category) {
-        if (category == null) return "📦";
-        String cat = category.toLowerCase();
-        if (cat.contains("vegetal") || cat.contains("salada")) return "🥬";
-        if (cat.contains("fruta") || cat.contains("banana") || cat.contains("maçã")) return "🍌";
-        if (cat.contains("carne") || cat.contains("frango") || cat.contains("bovino")) return "🥩";
-        if (cat.contains("peixe") || cat.contains("marisco")) return "🐟";
-        if (cat.contains("lácteo") || cat.contains("leite") || cat.contains("queijo")) return "🧀";
-        if (cat.contains("pão") || cat.contains("trigo") || cat.contains("grão")) return "🍞";
-        return "📦";
-    }
-    
     private void refreshClientProductList() {
         try {
             List<String> txtList = remoteObject.getRegisteredTransactions();
@@ -1074,10 +1062,8 @@ public class FoodChainGUI extends JFrame {
                         FoodTransaction tx = storeProducts.get(idx);
                         FoodProduct product = tx.getProduct();
                         
-                        // Criar botão clickável estilo loja virtual
-                        String emoji = getEmojiForCategory(product.getCategory());
+                        // Criar botão clickável estilo loja virtual (sem emoji)
                         JButton productBtn = new JButton("<html>" +
-                            "<font size='5'>" + emoji + "</font><br>" +
                             "<b style='font-size:14px'>" + product.getProductName() + "</b><br>" +
                             "<font size='3' color='gray'>" + product.getCategory() + "</font><br>" +
                             "<b style='font-size:13px' color='green'>€" + String.format("%.2f", product.getPrice()) + "</b>" +
@@ -1135,9 +1121,9 @@ public class FoodChainGUI extends JFrame {
             trace.append("═══════════════════════════════════════════════════════════\n");
             trace.append("🌾 RASTREAMENTO DO PRODUTO\n");
             trace.append("═══════════════════════════════════════════════════════════\n\n");
-            trace.append("Produto: ").append(product.getProductName()).append("\n");
+            trace.append("Produtor: ").append(product.getProductName()).append("\n");
             trace.append("Lote: ").append(product.getBatchId()).append("\n");
-            trace.append("Categoria: ").append(product.getCategory()).append("\n");
+            trace.append("Produto: ").append(product.getCategory()).append("\n");
             trace.append("Quantidade: ").append(product.getQuantity()).append(" ").append(product.getUnit()).append("\n");
             trace.append("Origem: ").append(product.getOrigin()).append("\n");
             trace.append("\n───────────────────────────────────────────────────────────\n");
@@ -1153,8 +1139,14 @@ public class FoodChainGUI extends JFrame {
                     trace.append("🌱 CRIADO\n");
                     trace.append("   Produtor: ").append(tx.getTxtSender()).append("\n");
                 } else {
-                    trace.append("🔄 TRANSFERÊNCIA\n");
-                    trace.append("   De: ").append(tx.getTxtSender()).append(" → Para: ").append(tx.getTxtReceiver()).append("\n");
+                    // Para a última etapa, destacar Loja/Vendedor em vez de genérico Transferência
+                    if (i == history.size() - 1) {
+                        trace.append("🏪 LOJA/VENDEDOR\n");
+                        trace.append("   Vendedor: ").append(tx.getTxtReceiver()).append("\n");
+                    } else {
+                        trace.append("🔄 TRANSFERÊNCIA\n");
+                        trace.append("   De: ").append(tx.getTxtSender()).append(" → Para: ").append(tx.getTxtReceiver()).append("\n");
+                    }
                 }
                 trace.append("   Estação: ").append(p.getCurrentStation()).append("\n");
                 trace.append("   Estado: ").append(p.getStatus()).append("\n");

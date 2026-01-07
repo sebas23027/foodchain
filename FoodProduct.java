@@ -196,7 +196,7 @@ public class FoodProduct implements Serializable {
         StringBuilder txt = new StringBuilder();
         txt.append(productName).append(" [").append(productId).append("]\n");
         txt.append("  Lote: ").append(batchId);
-        txt.append(" | Categoria: ").append(category);
+        txt.append(" | Produto: ").append(category);
         txt.append(" | Quantidade: ").append(quantity).append(" ").append(unit).append("\n");
         txt.append("  Origem: ").append(origin);
         txt.append(" | Estação Atual: ").append(currentStation).append("\n");
