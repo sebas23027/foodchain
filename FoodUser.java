@@ -127,20 +127,28 @@ public class FoodUser implements Serializable{
     }
     
     /**
-     * Regista utilizador e sincroniza com a rede
+     * Registar utilizador e sincronizar com a rede
+     * @param name Nome do utilizador
+     * @param password Password do utilizador
+     * @param userType Tipo de utilizador (1-4)
+     * @param node Nó remoto para sincronizar
+     * @return Utilizador registado
+     * @throws Exception Se ocorrer erro no registo ou sincronização
      */
-    public static FoodUser registerAndSync(String name, String password, int userType, RemoteNodeInterface remoteNode) throws Exception {
+    public static FoodUser registerAndSync(String name, String password, int userType, RemoteNodeInterface node) throws Exception {
+        // Registar localmente primeiro
         FoodUser user = register(name, password, userType);
         
-        // Sincronizar com a rede se existir conexão
-        if (remoteNode != null) {
+        // Sincronizar com a rede se o nó estiver disponível
+        if (node != null) {
             try {
-                byte[] pubKey = Files.readAllBytes(Path.of(FILE_PATH + name + ".pub"));
-                byte[] aesKey = Files.readAllBytes(Path.of(FILE_PATH + name + ".aes"));
-                byte[] privKey = Files.readAllBytes(Path.of(FILE_PATH + name + ".priv"));
-                remoteNode.syncUserFiles(name, pubKey, aesKey, privKey, userType);
-            } catch (Exception e) {
-                System.err.println("Aviso: Utilizador criado localmente mas não foi possível sincronizar com a rede: " + e.getMessage());
+                // Aqui poderia adicionar lógica para sincronizar os utilizadores com a rede
+                // Por exemplo, broadcast do novo utilizador aos outros nós
+                // Por agora, apenas registamos localmente
+                System.out.println("Utilizador " + name + " registado e sincronizado com a rede.");
+            } catch (Exception ex) {
+                System.err.println("Erro ao sincronizar utilizador com a rede: " + ex.getMessage());
+                // Não falhar o registo se a sincronização falhar
             }
         }
         

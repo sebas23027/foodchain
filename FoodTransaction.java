@@ -109,16 +109,30 @@ public class FoodTransaction implements Serializable {
     }
 
     @Override
-    public String toString() {
+public String toString() {
         StringBuilder txt = new StringBuilder();
         if (isCreateTransaction()) {
-            txt.append("[CREATE] Produtor: ").append(txtSender).append("\n");
+        txt.append("[CREATE] Produtor: ").append(txtSender).append("\n");
+    } else {
+        // Normalizar para comparar sem stresses
+        String s = (txtSender == null) ? "" : txtSender.trim().toLowerCase();
+        String r = (txtReceiver == null) ? "" : txtReceiver.trim().toLowerCase();
+
+        boolean isStorage = s.contains("armazem") && r.contains("armazem");
+        boolean isSale    = s.contains("loja") && r.contains("loja");
+
+        if (isStorage) {
+            txt.append("[STORAGE] Armazém: ").append(txtSender).append("\n");
+        } else if (isSale) {
+            txt.append("[SALE] Loja: ").append(txtSender).append("\n");
         } else {
             txt.append("[TRANSFER] ").append(txtSender).append(" → ").append(txtReceiver).append("\n");
         }
-        txt.append(product.toString());
-        return txt.toString();
     }
+
+    txt.append(product.toString());
+    return txt.toString();
+}
 
     //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     private static final long serialVersionUID = 202601050002L;

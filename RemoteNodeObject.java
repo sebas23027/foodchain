@@ -91,14 +91,6 @@ public class RemoteNodeObject extends UnicastRemoteObject implements RemoteNodeI
         node.addNode(this);
         //sincronizar a blockchain
         synchronizeBlockchain(node);
-        //sincronizar utilizadores
-        try {
-            sendUserSyncTo(node);
-        } catch (Exception e) {
-            if (listener != null) {
-                listener.onMessage("Aviso: Erro ao sincronizar utilizadores - " + e.getMessage());
-            }
-        }
         //propagar o no na rede
         for (RemoteNodeInterface iremoteP2P : network) {
             iremoteP2P.addNode(node);
@@ -319,109 +311,5 @@ public class RemoteNodeObject extends UnicastRemoteObject implements RemoteNodeI
     }
      public List getRegisteredTransactions() throws RemoteException{         
          return blockchain.getTransactions();
-     }
-     
-     //::::::::::: U S E R S  S Y N C  :::::::::::
-     @Override
-     public void syncUserFiles(String userName, byte[] pubKey, byte[] aesKey, byte[] privKey, int userType) throws RemoteException {
-         try {
-             java.nio.file.Path userPath = java.nio.file.Path.of(FoodUser.FILE_PATH);
-             java.nio.file.Files.createDirectories(userPath);
-             
-             // Verificar se o utilizador já existe
-             boolean userExists = java.nio.file.Files.exists(userPath.resolve(userName + ".pub"));
-             
-             // Guardar ficheiros do utilizador localmente
-             java.nio.file.Files.write(userPath.resolve(userName + ".pub"), pubKey);
-             java.nio.file.Files.write(userPath.resolve(userName + ".aes"), aesKey);
-             java.nio.file.Files.write(userPath.resolve(userName + ".priv"), privKey);
-             java.nio.file.Files.write(userPath.resolve(userName + ".type"), String.valueOf(userType).getBytes());
-             
-             if (listener != null) {
-                 listener.onMessage("Utilizador sincronizado: " + userName);
-             }
-             
-             // Propagar APENAS se for novo utilizador (evita loops)
-             if (!userExists) {
-                 for (RemoteNodeInterface node : network) {
-                     try {
-                         node.syncUserFiles(userName, pubKey, aesKey, privKey, userType);
-                     } catch (Exception e) {
-                         // Ignora erros de propagação
-                     }
-                 }
-             }
-         } catch (Exception ex) {
-             throw new RemoteException("Erro ao sincronizar utilizador: " + ex.getMessage());
-         }
-     }
-     
-     /**
-      * Envia apenas os utilizadores locais para um nó específico (sem propagação para evitar loop)
-      */
-     private void sendUserSyncTo(RemoteNodeInterface targetNode) throws RemoteException {
-         try {
-             java.io.File[] files = new java.io.File(FoodUser.FILE_PATH).listFiles();
-             if (files == null) return;
-             
-             for (java.io.File file : files) {
-                 if (file.getName().endsWith(".pub")) {
-                     String userName = file.getName().substring(0, file.getName().lastIndexOf("."));
-                     try {
-                         byte[] pubKey = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(FoodUser.FILE_PATH + userName + ".pub"));
-                         byte[] aesKey = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(FoodUser.FILE_PATH + userName + ".aes"));
-                         byte[] privKey = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(FoodUser.FILE_PATH + userName + ".priv"));
-                         byte[] typeBytes = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(FoodUser.FILE_PATH + userName + ".type"));
-                         int userType = Integer.parseInt(new String(typeBytes).trim());
-                         
-                         // Enviar APENAS para o nó específico (sem loop)
-                         targetNode.syncUserFiles(userName, pubKey, aesKey, privKey, userType);
-                     } catch (Exception e) {
-                         // Ignora utilizadores com ficheiros incompletos
-                     }
-                 }
-             }
-         } catch (Exception ex) {
-             throw new RemoteException("Erro ao sincronizar: " + ex.getMessage());
-         }
-     }
-     
-     @Override
-     public void requestUserSync() throws RemoteException {
-         try {
-             // Ler todos os utilizadores locais
-             java.io.File[] files = new java.io.File(FoodUser.FILE_PATH).listFiles();
-             if (files == null) return;
-             
-             for (java.io.File file : files) {
-                 if (file.getName().endsWith(".pub")) {
-                     String userName = file.getName().substring(0, file.getName().lastIndexOf("."));
-                     try {
-                         byte[] pubKey = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(FoodUser.FILE_PATH + userName + ".pub"));
-                         byte[] aesKey = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(FoodUser.FILE_PATH + userName + ".aes"));
-                         byte[] privKey = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(FoodUser.FILE_PATH + userName + ".priv"));
-                         byte[] typeBytes = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(FoodUser.FILE_PATH + userName + ".type"));
-                         int userType = Integer.parseInt(new String(typeBytes).trim());
-                         
-                         // Enviar para todos os nós da rede
-                         for (RemoteNodeInterface node : network) {
-                             try {
-                                 node.syncUserFiles(userName, pubKey, aesKey, privKey, userType);
-                             } catch (Exception e) {
-                                 // Ignora erros individuais
-                             }
-                         }
-                     } catch (Exception e) {
-                         // Ignora utilizadores com ficheiros incompletos
-                     }
-                 }
-             }
-             
-             if (listener != null) {
-                 listener.onMessage("Sincronização de utilizadores concluída");
-             }
-         } catch (Exception ex) {
-             throw new RemoteException("Erro na sincronização: " + ex.getMessage());
-         }
      }
 }
