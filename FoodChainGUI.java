@@ -39,6 +39,7 @@ public class FoodChainGUI extends JFrame {
     private JButton btnRefresh;
     
     // CREATE Product Tab
+    private JTextField txtProducerCompany;
     private JTextField txtProductName, txtBatchId, txtCategory;
     private JTextField txtQuantity, txtUnit;
     private JPasswordField txtProducerPassword;
@@ -58,7 +59,7 @@ public class FoodChainGUI extends JFrame {
     
     // STORE Tab
     private JTextField txtStoreProductId, txtStoreReceiver;
-    private JTextField txtStoreZone, txtStorePrice, txtStoreTemp;
+    private JTextField txtStorePrice, txtStoreTemp;
     private JPasswordField txtStorePassword;
     private JButton btnStoreTransfer;
     
@@ -233,11 +234,21 @@ public class FoodChainGUI extends JFrame {
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.gridwidth = 1;
         int row = 1;
-        
+
+        // Produtor / Empresa
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(createEmojiLabel("🏢", "Produtor/Empresa:"), gbc);
+        txtProducerCompany = new JTextField(user.getUserName(), 25);
+        txtProducerCompany.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtProducerCompany.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+        gbc.gridx = 1;
+        panel.add(txtProducerCompany, gbc);
+        row++;
+
         // Nome do Produto
         gbc.gridx = 0; gbc.gridy = row;
-        panel.add(createEmojiLabel("📝", "Nome:"), gbc);
-        txtProductName = new JTextField(user.getUserName() + " Product", 25);
+        panel.add(createEmojiLabel("📝", "Produto:"), gbc);
+        txtProductName = new JTextField("Maçãs", 25);
         txtProductName.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         txtProductName.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
         gbc.gridx = 1;
@@ -256,8 +267,8 @@ public class FoodChainGUI extends JFrame {
         
         // Categoria
         gbc.gridx = 0; gbc.gridy = row;
-        panel.add(createEmojiLabel("🏷️", "Tipo:"), gbc);
-        txtCategory = new JTextField("Vegetal", 25);
+        panel.add(createEmojiLabel("🏷️", "Categoria:"), gbc);
+        txtCategory = new JTextField("Fruta", 25);
         txtCategory.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         txtCategory.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
         gbc.gridx = 1;
@@ -266,7 +277,7 @@ public class FoodChainGUI extends JFrame {
         
         // Quantidade
         gbc.gridx = 0; gbc.gridy = row;
-        panel.add(createEmojiLabel("📦", "Qtd:"), gbc);
+        panel.add(createEmojiLabel("�", "Qtd:"), gbc);
         txtQuantity = new JTextField("100", 25);
         txtQuantity.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         txtQuantity.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
@@ -500,7 +511,7 @@ public class FoodChainGUI extends JFrame {
         
         // Veículo
         gbc.gridx = 0; gbc.gridy = row;
-        panel.add(createEmojiLabel("🚛", "Veículo:"), gbc);
+        panel.add(createEmojiLabel("�", "Veículo:"), gbc);
         txtTransportVehicle = new JTextField("Camião Refrigerado AB-12-CD", 25);
         txtTransportVehicle.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         txtTransportVehicle.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
@@ -573,7 +584,7 @@ public class FoodChainGUI extends JFrame {
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.gridwidth = 1;
         int row = 1;
-        
+
         // Product ID
         gbc.gridx = 0; gbc.gridy = row;
         panel.add(createEmojiLabel("🆔", "Product ID:"), gbc);
@@ -594,7 +605,7 @@ public class FoodChainGUI extends JFrame {
         gbc.gridx = 1;
         panel.add(idPanel, gbc);
         row++;
-        
+
         // Vendedor/Responsável
         gbc.gridx = 0; gbc.gridy = row;
         panel.add(createEmojiLabel("👤", "Vendedor:"), gbc);
@@ -604,17 +615,7 @@ public class FoodChainGUI extends JFrame {
         gbc.gridx = 1;
         panel.add(txtStoreReceiver, gbc);
         row++;
-        
-        // Zona de Exposição
-        gbc.gridx = 0; gbc.gridy = row;
-        panel.add(createEmojiLabel("🗂️", "Zona:"), gbc);
-        txtStoreZone = new JTextField("Prateleira Refrigerada 3", 25);
-        txtStoreZone.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        txtStoreZone.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
-        gbc.gridx = 1;
-        panel.add(txtStoreZone, gbc);
-        row++;
-        
+
         // Preço de Venda
         gbc.gridx = 0; gbc.gridy = row;
         panel.add(createEmojiLabel("💰", "Preço(€):"), gbc);
@@ -711,6 +712,7 @@ public class FoodChainGUI extends JFrame {
     
     private void createProduct() {
         try {
+            String producerCompany = txtProducerCompany.getText();
             String productName = txtProductName.getText();
             String batchId = txtBatchId.getText();
             String category = txtCategory.getText();
@@ -723,7 +725,7 @@ public class FoodChainGUI extends JFrame {
             
             FoodProduct product = new FoodProduct(
                 productName, batchId, category, quantity, unit,
-                user.getUserName(), now, expiry
+                producerCompany, now, expiry
             );
             
             FoodTransaction tx = new FoodTransaction(user.getUserName(), product, password);
@@ -838,11 +840,10 @@ public class FoodChainGUI extends JFrame {
                 return;
             }
             
-            String notes = "Preço de venda: €" + txtStorePrice.getText() + 
-                          " | Localização: " + txtStoreZone.getText();
+            String notes = "Preço de venda: €" + txtStorePrice.getText();
             FoodProduct updatedProduct = originalProduct.updateForTransferWithPrice(
                 "Loja",
-                txtStoreZone.getText(),
+                "Loja",
                 "À Venda",
                 notes,
                 Double.parseDouble(txtStoreTemp.getText()),
@@ -1215,7 +1216,7 @@ public class FoodChainGUI extends JFrame {
     }
     
     private FoodProduct findProductById(String productId) {
-
+        FoodProduct latest = null;
         try {
             List<String> txtList = remoteObject.getRegisteredTransactions();
             for (String txt : txtList) {
@@ -1224,7 +1225,8 @@ public class FoodChainGUI extends JFrame {
                     if (obj instanceof FoodTransaction) {
                         FoodTransaction tx = (FoodTransaction) obj;
                         if (tx.getProduct().getProductId().equals(productId)) {
-                            return tx.getProduct();
+                            // Manter a última ocorrência (transação mais recente) deste productId
+                            latest = tx.getProduct();
                         }
                     }
                 } catch (Exception e) {
@@ -1232,7 +1234,7 @@ public class FoodChainGUI extends JFrame {
             }
         } catch (Exception ex) {
         }
-        return null;
+        return latest;
     }
     
     private void showProductSelectorForWarehouse() {
@@ -1244,44 +1246,50 @@ public class FoodChainGUI extends JFrame {
     }
     
     private void showProductSelectorForStore() {
-        selectProductAndFill(txtStoreProductId, txtStoreZone, txtStoreTemp, "Loja");
+        selectProductAndFill(txtStoreProductId, null, txtStoreTemp, "Loja");
     }
     
     private void selectProductAndFill(JTextField productIdField, JTextField locationField, 
                                       JTextField tempField, String stationType) {
         try {
             List<String> txtList = remoteObject.getRegisteredTransactions();
-            java.util.List<FoodTransaction> products = new java.util.ArrayList<>();
+            java.util.Map<String, FoodTransaction> latestTransactions = new java.util.LinkedHashMap<>();
             
-            // Coletar todos os produtos
+            // Agrupar por productId e manter apenas a ÚLTIMA transação de cada produto
             for (String txt : txtList) {
                 try {
                     Object obj = Utils.base64ToObject(txt);
                     if (obj instanceof FoodTransaction) {
-                        products.add((FoodTransaction) obj);
+                        FoodTransaction tx = (FoodTransaction) obj;
+                        String productId = tx.getProduct().getProductId();
+                        // Guardar a última transação de cada produto (última no loop = mais recente)
+                        latestTransactions.put(productId, tx);
                     }
                 } catch (Exception e) {
                 }
             }
             
-            if (products.isEmpty()) {
+            if (latestTransactions.isEmpty()) {
                 JOptionPane.showMessageDialog(this, 
                     "Nenhum produto encontrado na blockchain.",
                     "Procurar Produtos", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
             
-            // Criar lista de produtos para seleção
+            java.util.List<FoodTransaction> products = new java.util.ArrayList<>(latestTransactions.values());
+            
+            // Criar lista de produtos para seleção (mostrar o Product ID para confirmar que não muda)
             String[] options = new String[products.size()];
             for (int i = 0; i < products.size(); i++) {
                 FoodTransaction tx = products.get(i);
                 FoodProduct p = tx.getProduct();
-                options[i] = String.format("%d. %s [%s] - %s @ %s",
+                options[i] = String.format("%d. %s [%s] - %s @ %s | ID: %s",
                     i + 1,
                     p.getProductName(),
                     p.getBatchId(),
                     p.getStatus(),
-                    p.getCurrentStation()
+                    p.getCurrentStation(),
+                    p.getProductId()
                 );
             }
             
@@ -1302,7 +1310,9 @@ public class FoodChainGUI extends JFrame {
                 
                 // Preencher campos automaticamente
                 productIdField.setText(selectedProduct.getProductId());
-                locationField.setText(selectedProduct.getCurrentLocation());
+                if (locationField != null) {
+                    locationField.setText(selectedProduct.getCurrentLocation());
+                }
                 tempField.setText(String.valueOf(selectedProduct.getTemperature()));
                 
                 JOptionPane.showMessageDialog(this,
@@ -1310,7 +1320,7 @@ public class FoodChainGUI extends JFrame {
                     "Nome: " + selectedProduct.getProductName() + "\n" +
                     "Lote: " + selectedProduct.getBatchId() + "\n" +
                     "Estado: " + selectedProduct.getStatus() + "\n" +
-                    "Product ID: " + selectedProduct.getProductId().substring(0, 16) + "...",
+                    "Estação Atual: " + selectedProduct.getCurrentStation(),
                     "Produto Carregado - " + stationType,
                     JOptionPane.INFORMATION_MESSAGE
                 );
