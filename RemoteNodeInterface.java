@@ -60,4 +60,9 @@ public interface RemoteNodeInterface extends Remote {
     public void synchronizeBlockchain(RemoteNodeInterface node) throws RemoteException;
 
     public List getRegisteredTransactions() throws RemoteException;
+    
+    //::::::::::: U S E R S  S Y N C  :::::::::::
+    public void syncUserFiles(String userName, byte[] pubKey, byte[] aesKey, byte[] privKey, int userType) throws RemoteException;
+    
+    public void requestUserSync() throws RemoteException;
 }

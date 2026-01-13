@@ -125,6 +125,27 @@ public class FoodUser implements Serializable{
         Files.write(Path.of(FILE_PATH + name + ".priv"), secretPriv);
         return user;
     }
+    
+    /**
+     * Regista utilizador e sincroniza com a rede
+     */
+    public static FoodUser registerAndSync(String name, String password, int userType, RemoteNodeInterface remoteNode) throws Exception {
+        FoodUser user = register(name, password, userType);
+        
+        // Sincronizar com a rede se existir conexão
+        if (remoteNode != null) {
+            try {
+                byte[] pubKey = Files.readAllBytes(Path.of(FILE_PATH + name + ".pub"));
+                byte[] aesKey = Files.readAllBytes(Path.of(FILE_PATH + name + ".aes"));
+                byte[] privKey = Files.readAllBytes(Path.of(FILE_PATH + name + ".priv"));
+                remoteNode.syncUserFiles(name, pubKey, aesKey, privKey, userType);
+            } catch (Exception e) {
+                System.err.println("Aviso: Utilizador criado localmente mas não foi possível sincronizar com a rede: " + e.getMessage());
+            }
+        }
+        
+        return user;
+    }
 
     public static FoodUser login(String name, String pass) throws Exception {
         FoodUser user = new FoodUser();

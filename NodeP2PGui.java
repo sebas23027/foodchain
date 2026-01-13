@@ -1575,6 +1575,13 @@ public class NodeP2PGui extends javax.swing.JFrame implements Nodelistener, Mine
             }
         });
     }
+    
+    @Override
+    public void onMessage(String message) {
+        SwingUtilities.invokeLater(() -> {
+            GuiUtils.addText(txtServerLog, message, message);
+        });
+    }
 
     @Override
     public void onStartMining(String message, int dificulty) {

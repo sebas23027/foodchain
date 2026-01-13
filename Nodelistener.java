@@ -28,5 +28,6 @@ public interface Nodelistener {
     public void onException(Exception e, String title);
     public void onTransaction(String transaction);
     public void onBlockchain(BlockChain blk);
+    public void onMessage(String message);
 
 }

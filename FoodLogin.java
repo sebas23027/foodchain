@@ -293,11 +293,27 @@ public class FoodLogin extends javax.swing.JFrame {
         try {
             // Obter o tipo de utilizador selecionado (cmbUserType.getSelectedIndex() + 1 porque começa em 0)
             int userType = cmbUserType.getSelectedIndex() + 1; // 1=Produtor, 2=Armazém, 3=Distribuidor, 4=Loja
-            FoodUser.register(txtRegisterUsername.getText(), pass2, userType);
-            displayUsers();
-            JOptionPane.showMessageDialog(this, "Utilizador registado com sucesso! Tipo: " + FoodUser.TYPE_NAMES[userType], "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            
+            // Tentar sincronizar com a rede se estiver ligado
+            RemoteNodeInterface node = null;
+            try {
+                node = (RemoteNodeInterface) RMI.getRemote(txtNodeAdress.getText());
+                FoodUser.registerAndSync(txtRegisterUsername.getText(), pass2, userType, node);
+                displayUsers();
+                JOptionPane.showMessageDialog(this, 
+                    "Utilizador registado e sincronizado com a rede!\nTipo: " + FoodUser.TYPE_NAMES[userType], 
+                    "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                // Se não conseguir ligar ao nó, registar apenas localmente
+                FoodUser.register(txtRegisterUsername.getText(), pass2, userType);
+                displayUsers();
+                JOptionPane.showMessageDialog(this, 
+                    "Utilizador registado localmente (não ligado à rede).\nTipo: " + FoodUser.TYPE_NAMES[userType] + 
+                    "\n\nLigue-se a um nó para sincronizar utilizadores.", 
+                    "Sucesso - Offline", JOptionPane.WARNING_MESSAGE);
+            }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Login", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Register", JOptionPane.ERROR_MESSAGE);
 
             System.getLogger(FoodLogin.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
